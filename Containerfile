@@ -60,9 +60,8 @@ RUN mkdir -p /var/lib/alternatives
 # RPMfusion packages are available by default in ublue main images
 # List of rpmfusion packages can be found here:
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
-RUN rpm-ostree install screen steam flatpak
-RUN flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-RUN flatpak install flathub com.spotify.Client
+RUN rpm-ostree install screen steam lpf-spotify-client
+RUN lpf update
 
 
 # example package from rpmfusion
