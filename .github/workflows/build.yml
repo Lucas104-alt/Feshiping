@@ -44,11 +44,12 @@ jobs:
           docker images
           echo "Check docker configuration and context"
 
-      - name: Set lowercase image name
+      - name: Set lowercase image name and debug
         run: |
-          echo "Converting MY_IMAGE_NAME to lowercase."
-          echo "MY_IMAGE_NAME_LOWER=$(echo $MY_IMAGE_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-          echo "MY_IMAGE_NAME_LOWER set as ${{ env.MY_IMAGE_NAME_LOWER }}"
+            MY_IMAGE_NAME_LOWER=$(echo "${{ env.MY_IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+            echo "MY_IMAGE_NAME_LOWER=$MY_IMAGE_NAME_LOWER" >> $GITHUB_ENV
+            echo "Lowercase Image Name: $MY_IMAGE_NAME_LOWER"
+        
 
       - name: Some Step
         continue-on-error: true
