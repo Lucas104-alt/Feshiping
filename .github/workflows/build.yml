@@ -36,7 +36,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.1
-
+      
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3.0.0
         with:
@@ -51,8 +51,10 @@ jobs:
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Generate a unique tag
         run: echo "UNIQUE_TAG=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+
       - name: Convert image name to lowercase
         run: echo "MY_IMAGE_NAME_LOWER=$(echo ${{ env.MY_IMAGE_NAME }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
@@ -66,29 +68,18 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
       - name: Save Docker image to tar file
-        run: |
-          docker save ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest | xz -z - > my-image-${{ github.run_id }}.tar.xz
+        run: docker save ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest | xz -z - > my-image-${{ github.run_id }}.tar.xz
+
       - name: List files to verify
         run: ls -lh
-      - name: Create and push tag
+
+      - name: Create and push tag if it does not exist
         run: |
-          if git rev-parse ${{ env.VERSION }} >/dev/null 2>&1; then
-            echo "Tag exists. Skipping creation."
-          else
+          if ! git rev-parse ${{ env.VERSION }} >/dev/null 2>&1; then
             git tag ${{ env.VERSION }}
             git push origin ${{ env.VERSION }}
-          
-      - name: Debugging Git status
-        run: |
-          git status
-          git log -1
-        
-      - name: Push tag
-        run: |
-          git push origin ${{ env.VERSION }}
-        
-  
-  
+          fi
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -100,8 +91,7 @@ jobs:
           body: "Automated release of ${{ env.MY_IMAGE_NAME }}"
           draft: false
           prerelease: false
-  
-  
+
       - name: Upload Docker image tar.xz as release asset
         uses: actions/upload-release-asset@v1
         env:
@@ -111,4 +101,3 @@ jobs:
           asset_path: ./my-image-${{ github.run_id }}.tar.xz
           asset_name: my-image-${{ github.run_id }}.tar.xz
           asset_content_type: application/x-xz
-  
