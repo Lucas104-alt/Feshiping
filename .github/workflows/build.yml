@@ -66,11 +66,11 @@ jobs:
         env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
           body: |
             ### New Docker Image Available
-            - **Image:** ${{ env.IMAGE_REGISTRY }}:latest
+            - **Image:** ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest
             - **Description:** ${{ env.MY_IMAGE_DESC }}
           draft: false
           prerelease: false
