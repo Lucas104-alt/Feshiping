@@ -25,7 +25,6 @@ jobs:
       contents: write
       packages: write
       id-token: write
-      # Add specific permission for releases
       issues: write
       pull-requests: write
       actions: read
@@ -36,7 +35,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.1
-      
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3.0.0
         with:
@@ -51,6 +50,11 @@ jobs:
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Git identity
+        run: |
+          git config --global user.name 'Lucas11'
+          git config --global user.email 'altamiranolucas2013@gmail.com'
 
       - name: Generate a unique tag
         run: echo "UNIQUE_TAG=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
@@ -67,12 +71,40 @@ jobs:
           tags: ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest
           platforms: linux/amd64,linux/arm64
 
-      - name: Manually Create Release
-        id: create_release
+      - name: Save Docker image to tar file
         run: |
-          response=$(curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            https://api.github.com/repos/${{ github.repository }}/releases \
-            -d '{"tag_name": "release-${{ github.run_number }}", "name": "Release ${{ github.run_number }}", "body": "Description of the release", "draft": false, "prerelease": false}')
-          echo "::set-output name=upload_url::$(echo $response | jq -r .upload_url)"
-        
+          docker save ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest | xz -z - > my-image-${{ github.run_id }}.tar.xz
+
+      - name: List files to verify
+        run: ls -lh
+
+      - name: Create and push tag if it does not exist
+        run: |
+          if ! git rev-parse ${{ env.VERSION }} >/dev/null 2>&1; then
+            git tag ${{ env.VERSION }}
+            git push origin ${{ env.VERSION }}
+          else
+            echo "Tag ${{ env.VERSION }} already exists."
+          fi
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.VERSION }}
+          release_name: Release ${{ env.VERSION }}
+          body: "Automated release of ${{ env.MY_IMAGE_NAME }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload Docker image tar.xz as release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./my-image-${{ github.run_id }}.tar.xz
+          asset_name: my-image-${{ github.run_id }}.tar.xz
+          asset_content_type: application/x-xz
