@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 env:
-  MY_IMAGE_NAME: "ublue-custom"  # the name of the image produced by this build
+  MY_IMAGE_NAME: "feshiping"  # the name of the image produced by this build
   MY_IMAGE_DESC: "My Customized Universal Blue System Image"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # do not edit
 
@@ -38,21 +38,28 @@ jobs:
             registry: ${{ env.IMAGE_REGISTRY }}
             username: ${{ github.actor }}
             password: ${{ secrets.GITHUB_TOKEN }}
-  
+        - name: Debug output
+          run: |
+              docker images
+              echo "Check docker configuration and context"
+          
         - name: Set lowercase image name
           run: |
             echo "Converting MY_IMAGE_NAME to lowercase."
             echo "MY_IMAGE_NAME_LOWER=$(echo $MY_IMAGE_NAME | tr '[:upper:]' '[:lower:]')"
             echo "MY_IMAGE_NAME_LOWER=$(echo $MY_IMAGE_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
             echo "MY_IMAGE_NAME_LOWER set as ${{ env.MY_IMAGE_NAME_LOWER }}"
-  
+        - name: Some Step
+          continue-on-error: true
+          run: some-command-that-might-fail
+          
         - name: Build and push Docker image
           uses: docker/build-push-action@v5.3.0
           with:
             context: .
             file: ./Containerfile
             push: true
-            tags: ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest, ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:${{ github.sha }}
+            tags: ghcr.io/lucas11222/feshiping:latest
             platforms: linux/amd64,linux/arm64
           continue-on-error: true
   
