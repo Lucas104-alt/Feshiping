@@ -20,9 +20,16 @@ env:
 jobs:
   build_push:
     permissions:
-      contents: read  
+      contents: write
       packages: write
       id-token: write
+      # Add specific permission for releases
+      issues: write
+      pull-requests: write
+      actions: read
+      discussions: write
+      deployments: write
+    
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
