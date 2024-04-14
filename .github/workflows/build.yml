@@ -14,7 +14,7 @@ on:
 
 env:
   MY_IMAGE_NAME: "feshiping"  # Ensure this is the intended image name
-  MY_IMAGE_DESC: "Install the sou"
+  MY_IMAGE_DESC: "Install"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # This will auto-populate based on the repository owner
 
 jobs:
@@ -66,7 +66,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This assumes your create release step is named `create_release`
+          upload_url: ${{ steps.Build_and_push_Docker_image.outputs.upload_url }} # This assumes your create release step is named `create_release`
           asset_path: ./my-project-${{ github.sha }}.tar.xz
           asset_name: my-project-${{ github.sha }}.tar.xz
           asset_content_type: application/x-xz
