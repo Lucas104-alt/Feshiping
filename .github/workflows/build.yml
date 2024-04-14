@@ -45,10 +45,8 @@ jobs:
           
         - name: Set lowercase image name
           run: |
-            echo "Converting MY_IMAGE_NAME to lowercase."
-            echo "MY_IMAGE_NAME_LOWER=$(echo $MY_IMAGE_NAME | tr '[:upper:]' '[:lower:]')"
-            echo "MY_IMAGE_NAME_LOWER=$(echo $MY_IMAGE_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-            echo "MY_IMAGE_NAME_LOWER set as ${{ env.MY_IMAGE_NAME_LOWER }}"
+           echo "MY_IMAGE_NAME_LOWER=$(echo $MY_IMAGE_NAME | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+            
         - name: Some Step
           continue-on-error: true
           run: some-command-that-might-fail
@@ -59,16 +57,17 @@ jobs:
             context: .
             file: ./Containerfile
             push: true
-            tags: ghcr.io/lucas11222/feshiping:latest
+            tags: ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest
             platforms: linux/amd64,linux/arm64
+        
           continue-on-error: true
   
         - name: Sign container image
           if: github.event_name != 'pull_request'
           run: |
-            echo "Signing the container image."
-            cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME }}@${{ steps.build-push.outputs.digest }}
+            cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest
           env:
             COSIGN_EXPERIMENTAL: false
             COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
+        
   
