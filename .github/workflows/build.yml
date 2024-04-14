@@ -15,15 +15,15 @@ on:
 env:
   MY_IMAGE_NAME: "feshiping"  # Ensure this is the intended image name
   MY_IMAGE_DESC: "My Customized Universal Blue System Image"
-  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}/${{ env.MY_IMAGE_NAME | lower }}"  # Automatically convert to lowercase
+  IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # This will auto-populate based on the repository owner
 
 jobs:
   build_push:
-    runs-on: ubuntu-latest
     permissions:
-      write-all
-
-
+      contents: read  
+      packages: write
+      id-token: write
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.1
@@ -39,14 +39,12 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
-          registry: ghcr.io
+          registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Debug output
-        run: |
-          docker images
-          echo "Check docker configuration and context"
+      - name: Convert image name to lowercase
+        run: echo "MY_IMAGE_NAME_LOWER=$(echo ${{ env.MY_IMAGE_NAME }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5.3.0
@@ -54,32 +52,5 @@ jobs:
           context: .
           file: ./Containerfile
           push: true
-          tags: ${{ env.IMAGE_REGISTRY }}:latest
+          tags: ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest
           platforms: linux/amd64,linux/arm64
-
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.4.0
-        if: github.event_name != 'pull_request'
-
-      - name: Sign container image
-        if: github.event_name != 'pull_request'
-        run: |
-          echo "Signing the container image."
-          cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.IMAGE_REGISTRY }}:latest
-        env:
-          COSIGN_EXPERIMENTAL: false
-          COSIGN_PRIVATE_KEY: ${{ secrets.SIGNING_SECRET }}
-
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body: |
-            ### New Docker Image Available
-            - **Image:** ${{ env.IMAGE_REGISTRY }}:latest
-            - **Description:** ${{ env.MY_IMAGE_DESC }}
-          draft: false
-          prerelease: false
