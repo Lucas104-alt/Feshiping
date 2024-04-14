@@ -61,13 +61,16 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest
           platforms: linux/amd64,linux/arm64
+      - name: Save Docker image to tar file
+        run: |
+          docker save ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest | xz -z - > my-image-${{ github.run_id }}.tar.xz
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.Build_and_push_Docker_image.outputs.upload_url }} # This assumes your create release step is named `create_release`
-          asset_path: ./my-project-${{ github.sha }}.tar.xz
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./
           asset_name: my-project-${{ github.sha }}.tar.xz
           asset_content_type: application/x-xz
   
