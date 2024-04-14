@@ -14,7 +14,7 @@ on:
 
 env:
   MY_IMAGE_NAME: "feshiping"  # Ensure this is the intended image name
-  MY_IMAGE_DESC: "My Customized Universal Blue System Image"
+  MY_IMAGE_DESC: "Install the sou"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"  # This will auto-populate based on the repository owner
 
 jobs:
@@ -61,16 +61,13 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest
           platforms: linux/amd64,linux/arm64
-      - name: Create Release
-        uses: actions/create-release@v1
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          body: |
-            ### New Docker Image Available
-            - **Image:** ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest
-            - **Description:** ${{ env.MY_IMAGE_DESC }}
-          draft: false
-          prerelease: false
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This assumes your create release step is named `create_release`
+          asset_path: ./my-project-${{ github.sha }}.tar.xz
+          asset_name: my-project-${{ github.sha }}.tar.xz
+          asset_content_type: application/x-xz
+  
