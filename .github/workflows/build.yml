@@ -20,7 +20,8 @@ env:
 jobs:
   build_push:
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      write-all
 
 
     steps:
