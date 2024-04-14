@@ -70,10 +70,23 @@ jobs:
           docker save ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest | xz -z - > my-image-${{ github.run_id }}.tar.xz
       - name: List files to verify
         run: ls -lh
-      - name: Push tag with detailed errors
+      - name: Create and push tag
         run: |
-          GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push origin ${{ env.VERSION }}
-
+          if git rev-parse ${{ env.VERSION }} >/dev/null 2>&1; then
+            echo "Tag exists. Skipping creation."
+          else
+            git tag ${{ env.VERSION }}
+            git push origin ${{ env.VERSION }}
+          
+      - name: Debugging Git status
+        run: |
+          git status
+          git log -1
+        
+      - name: Push tag
+        run: |
+          git push origin ${{ env.VERSION }}
+        
   
   
       - name: Create Release
