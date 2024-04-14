@@ -16,8 +16,7 @@ env:
   MY_IMAGE_NAME: "feshiping"  # Ensure this is the intended image name
   MY_IMAGE_DESC: "Install"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
-  VERSION: "v1.0.0 again 2 "
-  # This will auto-populate based on the repository owner
+  VERSION: "v1.0.0-again-2"  # Ensure no spaces and well-formatted version
 
 jobs:
   build_push:
@@ -51,11 +50,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Git identity
-        run: |
-          git config --global user.name 'Lucas11'
-          git config --global user.email 'altamiranolucas2013@gmail.com'
-
       - name: Generate a unique tag
         run: echo "UNIQUE_TAG=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
@@ -80,9 +74,11 @@ jobs:
 
       - name: Create and push tag if it does not exist
         run: |
-          if ! git rev-parse ${{ env.VERSION }} >/dev/null 2>&1; then
-            git tag ${{ env.VERSION }}
-            git push origin ${{ env.VERSION }}
+          echo "Checking tag: ${{ env.VERSION }}"
+          if ! git rev-parse "${{ env.VERSION }}" >/dev/null 2>&1; then
+            echo "Creating tag: ${{ env.VERSION }}"
+            git tag "${{ env.VERSION }}"
+            git push origin "${{ env.VERSION }}"
           else
             echo "Tag ${{ env.VERSION }} already exists."
           fi
