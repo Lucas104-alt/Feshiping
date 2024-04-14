@@ -16,7 +16,7 @@ env:
   MY_IMAGE_NAME: "feshiping"  # Ensure this is the intended image name
   MY_IMAGE_DESC: "Install"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
-  VERSION: "v1.0.0"
+  VERSION: "v1.0.0 again"
   # This will auto-populate based on the repository owner
 
 jobs:
