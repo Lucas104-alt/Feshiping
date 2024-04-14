@@ -70,10 +70,9 @@ jobs:
           docker save ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest | xz -z - > my-image-${{ github.run_id }}.tar.xz
       - name: List files to verify
         run: ls -lh
-      - name: Create and push tag
+      - name: Push tag with detailed errors
         run: |
-          git tag ${{ env.VERSION }}
-          git push origin ${{ env.VERSION }}
+          GIT_TRACE=1 GIT_CURL_VERBOSE=1 git push origin ${{ env.VERSION }}
 
   
   
