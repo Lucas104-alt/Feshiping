@@ -51,7 +51,8 @@ jobs:
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: Generate a unique tag
+        run: echo "UNIQUE_TAG=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
       - name: Convert image name to lowercase
         run: echo "MY_IMAGE_NAME_LOWER=$(echo ${{ env.MY_IMAGE_NAME }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
@@ -73,8 +74,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.VERSION }}-${{ github.run_number }}
-          release_name: Release ${{ env.VERSION }}-${{ github.run_number }}
+          tag_name: ${{ env.UNIQUE_TAG }}
+          release_name: Release ${{ env.VERSION }}-${{ github.run_number }}-${{ env.UNIQUE_TAG }}
           body: |
             ### New Release of ${{ env.MY_IMAGE_NAME }}
             - **Version:** ${{ env.VERSION }}
