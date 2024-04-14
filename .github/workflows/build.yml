@@ -74,14 +74,8 @@ jobs:
           body: "Description of the release"
           draft: false
           prerelease: false
-  
-      - name: Upload Docker image tar.xz as release asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./my-image-${{ github.run_id }}.tar.xz
-          asset_name: my-image-${{ github.run_id }}.tar.xz
-          asset_content_type: application/x-xz
+      - name: Save Docker image to tar file
+        run: |
+          docker save ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest | xz -z - > my-image-${{ github.run_id }}.tar.xz
+        
   
