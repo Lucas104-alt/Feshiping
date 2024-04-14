@@ -54,3 +54,16 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest
           platforms: linux/amd64,linux/arm64
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            ### New Docker Image Available
+            - **Image:** ${{ env.IMAGE_REGISTRY }}:latest
+            - **Description:** ${{ env.MY_IMAGE_DESC }}
+          draft: false
+          prerelease: false
