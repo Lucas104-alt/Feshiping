@@ -72,27 +72,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}  # Ensure this matches the ID from the create release step
           asset_path: ./my-image-${{ github.run_id }}.tar.xz
           asset_name: my-image-${{ github.run_id }}.tar.xz
           asset_content_type: application/x-xz
-      - name: Save and list Docker image
-        working-directory: ${{ github.workspace }}
-        run: |
-          docker save ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest | xz -z - > my-image-${{ github.run_id }}.tar.xz
-          ls -l my-image-${{ github.run_id }}.tar.xz
         
       - name: Create Release
-        id: create_release
+        id: create_release  # Make sure this ID matches the one you reference later
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: release-${{ github.run_number }}
           release_name: Release ${{ github.run_number }}
-          body: |
-            New release of the project.
-            - **Download the Docker image as a tarball:** `my-image-${{ github.run_id }}.tar.xz`
+          body: "Description of the release"
           draft: false
           prerelease: false
         
