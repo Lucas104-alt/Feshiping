@@ -15,7 +15,7 @@
 # - "base"
 #
 #  "aurora", "bazzite", "bluefin" or "ucore" may also be used but have different suffixes.
-ARG SOURCE_IMAGE="kinoite"
+ARG SOURCE_IMAGE="bazzite"
 
 ## SOURCE_SUFFIX arg should include a hyphen and the appropriate suffix name
 # These examples all work for silverblue/kinoite/sericea/onyx/lazurite/vauxite/base
@@ -33,7 +33,7 @@ ARG SOURCE_IMAGE="kinoite"
 # - stable-zfs
 # - stable-nvidia-zfs
 # - (and the above with testing rather than stable)
-ARG SOURCE_SUFFIX="-main"
+ARG SOURCE_SUFFIX=stable
 
 ## FEDORA_VERSION arg must be a version built by ublue: eg, 39 or 40
 ARG FEDORA_VERSION="39"
@@ -60,7 +60,7 @@ RUN mkdir -p /var/lib/alternatives
 # RPMfusion packages are available by default in ublue main images
 # List of rpmfusion packages can be found here:
 # https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/39/x86_64/repoview/index.html&protocol=https&redirect=1
-RUN rpm-ostree install screen steam lpf-spotify-client cava python
+RUN rpm-ostree install screen lpf-spotify-client cava python
 RUN lpf update
 
 

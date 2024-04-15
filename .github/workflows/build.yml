@@ -17,6 +17,8 @@ env:
   MY_IMAGE_DESC: "Install"
   IMAGE_REGISTRY: "ghcr.io/${{ github.repository_owner }}"
   VERSION: "v1.0.0-again-2"  # Ensure no spaces and well-formatted version
+  IMAGE_REPO: "https://github.com/lucas11222/Feshiping"
+  IMAGE_TAG: "First ISO"
 
 jobs:
   build_push:
@@ -65,42 +67,32 @@ jobs:
           tags: ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest
           platforms: linux/amd64,linux/arm64
 
-      - name: Save Docker image to tar file
-        run: |
-          docker save ${{ env.IMAGE_REGISTRY }}/${{ env.MY_IMAGE_NAME_LOWER }}:latest | xz -z - > my-image-${{ github.run_id }}.tar.xz
-
-      - name: List files to verify
-        run: ls -lh
-
-      - name: Create and push tag if it does not exist
-        run: |
-          echo "Checking tag: ${{ env.VERSION }}"
-          if ! git rev-parse "${{ env.VERSION }}" >/dev/null 2>&1; then
-            echo "Creating tag: ${{ env.VERSION }}"
-            git tag "${{ env.VERSION }}"
-            git push origin "${{ env.VERSION }}"
-          else
-            echo "Tag ${{ env.VERSION }} already exists."
-          fi
-
+      - name: Build ISO
+        uses: jasonn3/build-container-installer@main
+        id: build
+        with:
+          image_name: ${{ env.MY_IMAGE_NAME}}
+          image_repo: ${{ env.IMAGE_REPO}}
+          image_tag: ${{ env.IMAGE_TAG }}
+          version: ${{ env.VERSION }}
+          iso_name: ${{ env.MY_IMAGE_NAME }}-${{ env.IMAGE_TAG }}-${{ env.VERSION }}.iso
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.VERSION }}
-          release_name: Release ${{ env.VERSION }}
+          tag_name: ${{ steps.build.outputs.iso_name }}
+          release_name: Release ${{ steps.build.outputs.iso_path }}
           body: "Automated release of ${{ env.MY_IMAGE_NAME }}"
           draft: false
           prerelease: false
-
       - name: Upload Docker image tar.xz as release asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./my-image-${{ github.run_id }}.tar.xz
-          asset_name: my-image-${{ github.run_id }}.tar.xz
-          asset_content_type: application/x-xz
+          upload_url: ${{ steps.build.outputs.iso_path }}
+          asset_path: ${{ env.MY_IMAGE_NAME }}-${{ env.IMAGE_TAG }}-${{ env.VERSION }}.iso
+          asset_name: ${{ env.MY_IMAGE_NAME }}-${{ env.IMAGE_TAG }}-${{ env.VERSION }}.iso
+          asset_content_type: application/x-iso9660-image
