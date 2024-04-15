@@ -36,7 +36,7 @@ ARG SOURCE_IMAGE="bazzite"
 ARG SOURCE_SUFFIX=stable
 
 ## FEDORA_VERSION arg must be a version built by ublue: eg, 39 or 40
-ARG FEDORA_VERSION="39"
+ARG FEDORA_VERSION="40"
 
 
 ### 2. SOURCE IMAGE
