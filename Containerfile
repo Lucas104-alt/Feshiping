@@ -36,12 +36,12 @@ ARG SOURCE_IMAGE="bazzite"
 ARG SOURCE_SUFFIX=stable
 
 ## FEDORA_VERSION arg must be a version built by ublue: eg, 39 or 40
-ARG FEDORA_VERSION="40"
+ARG FEDORA_VERSION="39"
 
 
 ### 2. SOURCE IMAGE
 ## this is a standard Containerfile FROM using the build ARGs above to select the right upstream image
-FROM ghcr.io/ublue-os/${SOURCE_IMAGE}${SOURCE_SUFFIX}:${FEDORA_VERSION}
+FROM ghcr.io/ublue-os/bazzite:stable
 
 
 ### 3. PRE-MODIFICATIONS
